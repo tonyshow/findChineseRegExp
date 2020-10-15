@@ -6,6 +6,7 @@
  var xlsx = require('node-xlsx');
  var async = require('async');
  var parsinFile = require("./parsinFile")
+ const axios = require('axios');
  var folderPath = process.argv[2];
  class app
  {
@@ -90,25 +91,43 @@
          {
              return console.log("未找到 \nall finsh success!!!")
          }
+         let needTranslateList = "";
          var execlList = [];
-         for (var idx in _saveList)
+         let size = _.size(_saveList)
+         for (let txt of _saveList)
          {
-             execlList.push([_saveList[idx]])
+             axios.get('https://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=' + encodeURI(txt))
+                 .then(response =>
+                 {
+                     let translateResult = response.data.translateResult[0][0];
+                     let tgt = translateResult.tgt
+                     execlList.push([translateResult.src, tgt])
+
+                     if (size == _.size(execlList))
+                     {
+                         var buffer = xlsx.build([
+                         {
+                             name: 'sheet1',
+                             data: execlList
+                         }]);
+                         fs.writeFileSync("out/" + 'all.xlsx', buffer,
+                         {
+                             'flag': 'w'
+                         });
+                     }
+                 })
+                 .catch(error =>
+                 {
+                     console.log(error);
+                 });
          }
-         var buffer = xlsx.build([
-         {
-             name: 'sheet1',
-             data: execlList
-         }]);
-         fs.writeFileSync("out/" + 'all.xlsx', buffer,
-         {
-             'flag': 'w'
-         });
      }
  }
  if (!!folderPath)
  {
+
      new app(folderPath);
+
  }
  else
  {
