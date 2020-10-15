@@ -1,0 +1,16 @@
+{
+  "name": "findchineseregexp",
+  "version": "1.0.0",
+  "description": "查找文件夹下所有指定文件类型的中文并且输出到xx.xlsx",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.2.0",
+    "node-xlsx": "^0.15.0",
+    "underscore": "^1.11.0"
+  }
+}
