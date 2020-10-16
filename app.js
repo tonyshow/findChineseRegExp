@@ -74,13 +74,12 @@
                  {
                      this.list = _.union(this.list, list);
                      callback();
-                     //  
                  });
              });
          })
          async.waterfall(this.asyncList, (err, result) =>
          {
-             console.log("union list finsh success")
+             console.log("the union list finsh success")
              this.saveExeclFile(this.list);
          })
      };
@@ -91,36 +90,68 @@
          {
              return console.log("未找到 \nall finsh success!!!")
          }
-         let needTranslateList = "";
+
          var execlList = [];
-         let size = _.size(_saveList)
          for (let txt of _saveList)
          {
-             axios.get('https://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=' + encodeURI(txt))
-                 .then(response =>
-                 {
-                     let translateResult = response.data.translateResult[0][0];
-                     let tgt = translateResult.tgt
-                     execlList.push([translateResult.src, tgt])
+             if (-1 != txt.indexOf("needFind="))
+             {
+                 txt = txt.replace("needFind=", "");
+                 execlList.push([txt, "需要检查是否为拼接"])
+             }
+             else
+             {
+                 execlList.push([txt])
+             }
 
-                     if (size == _.size(execlList))
-                     {
-                         var buffer = xlsx.build([
-                         {
-                             name: 'sheet1',
-                             data: execlList
-                         }]);
-                         fs.writeFileSync("out/" + 'all.xlsx', buffer,
-                         {
-                             'flag': 'w'
-                         });
-                     }
-                 })
-                 .catch(error =>
-                 {
-                     console.log(error);
-                 });
          }
+         var buffer = xlsx.build([
+         {
+             name: 'sheet1',
+             data: execlList
+         }]);
+
+         fs.writeFileSync("out/" + 'all.xlsx', buffer,
+         {
+             'flag': 'w'
+         });
+         //  var indxMax = 0;
+         //  let size = _.size(_saveList)
+         //  let needTranslateList = "";
+         //  //自动翻译
+         //  for (let txt of _saveList)
+         //  {
+         //      console.log(txt)
+         //      axios.get('https://fanyi.youdao.com/translate?&doctype=json&type=AUTO&i=' + encodeURI(txt))
+         //          .then(response =>
+         //          {
+         //              ++indxMax;
+         //              console.log(indxMax)
+         //              if (!!response.data && !!response.data.translateResult)
+         //              {
+         //                  let translateResult = response.data.translateResult[0][0];
+         //                  let tgt = translateResult.tgt
+         //                  execlList.push([translateResult.src, tgt])
+
+         //              }
+         //              if (size == indxMax)
+         //              {
+         //                  var buffer = xlsx.build([
+         //                  {
+         //                      name: 'sheet1',
+         //                      data: execlList
+         //                  }]);
+         //                  fs.writeFileSync("out/" + 'all.xlsx', buffer,
+         //                  {
+         //                      'flag': 'w'
+         //                  });
+         //              }
+         //          })
+         //          .catch(error =>
+         //          {
+         //              console.log(error);
+         //          });
+         //  }
      }
  }
  if (!!folderPath)

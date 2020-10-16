@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/app.js",
-            "args": ["./../vueLearn/src"]
+            "args": ["./n"]
         }
     ]
 }

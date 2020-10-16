@@ -13,7 +13,7 @@ class parsinFile
         var strLen = (indexStart2 - indexStart) - 1;
         this.execlFileName = _fullPath.substr(indexStart + 1, indexStart + strLen);
         this.fileInfo = "";
-        this.reg = /[\u4e00-\u9fa5]+/g
+        this.reg = /(\/\/- [\u4e00-\u9fa5]+)|(\/\/- @[\u4e00-\u9fa5]+)|(\/\/[\u4e00-\u9fa5]+)|([\u4e00-\u9fa5]+)/g
         this.totalRepeatCnt = 0; //未去重
         this.list = [];
         this.endCallBack = _endCallBack; //检查出来的结果
@@ -26,16 +26,40 @@ class parsinFile
         {
             input: fRead,
         });
-        let currIdx = 1;
         objReadline.on('line', (line) =>
         {
+            if (-1 != line.indexOf("//"))
+            {
+                // 去掉被注释掉的部分文字
+                let pos = line.indexOf("//");
+                line = line.substr(0, pos);
+            }
+            // vue全行注释
+            if (-1 != line.indexOf("//-"))
+            {
+                return;
+            }
             let findResultList = line.match(this.reg)
             if (null != findResultList)
             {
-                this.totalRepeatCnt += findResultList.length;
-                this.list = _.union(this.list, findResultList);
+                findResultList = _.reject(findResultList, (info) =>
+                {
+                    return info.indexOf("//") != -1;
+                })
+                if (findResultList.length == 1)
+                {
+                    this.totalRepeatCnt += findResultList.length;
+                    this.list = _.union(this.list, findResultList);
+                }
+                else if (findResultList.length > 1)
+                {
+                    if (findResultList.toString().indexOf("//") == -1)
+                    {
+                        this.totalRepeatCnt += 1;
+                        this.list = _.union(this.list, ["needFind=" + findResultList.toString()]);
+                    }
+                }
             }
-            currIdx++;
         });
         objReadline.on('close', () =>
         {
